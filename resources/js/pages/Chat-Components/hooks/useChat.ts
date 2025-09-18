@@ -1,6 +1,5 @@
-//ts-nocheck
+// ts-nocheck
 import { useEffect, useRef, useState } from 'react';
-
 import { parseThink } from '../utils/parseThink';
 
 type Msg = { role: 'user' | 'assistant' | 'system'; content: string };
@@ -11,13 +10,13 @@ export function useChat() {
     const [model, setModel] = useState(localStorage.getItem('model'));
     const [temperature, setTemperature] = useState(parseFloat(localStorage.getItem('temp')));
     const [input, setInput] = useState('');
-    const [history, setHistory] = useState<Msg[]>(()=>JSON.parse(localStorage.getItem('hist') || '[]'));
+    const [history, setHistory] = useState<Msg[]>(() => JSON.parse(localStorage.getItem('hist')));
     const boxRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-       localStorage.setItem('model',model);
-       localStorage.setItem('temp',String(temperature));
-       localStorage.setItem('hist',JSON.stringify(history));
+        localStorage.setItem('model', model);
+        localStorage.setItem('temp', String(temperature));
+        localStorage.setItem('hist', JSON.stringify(history));
     }, [model, temperature, history]);
 
     useEffect(() => {
@@ -29,10 +28,10 @@ export function useChat() {
         const msgs: Msg[] = [...history, { role: 'system', content: sys }, { role: 'user', content: input.trim() }];
         setHistory((h) => [...h, { role: 'user', content: input.trim() }]);
         setInput('');
-        const res = await fetch('/api/chat',{
-          method: "POST",
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({model, temperature, messages: msgs})
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ model, temperature, messages: msgs }),
         });
         const json = await res.json();
         const { think, clean } = parseThink(json.content || '');
@@ -46,5 +45,10 @@ export function useChat() {
         localStorage.removeItem('hist');
     };
 
-    return { model, setModel, temperature, setTemperature, input, setInput, history, setHistory, boxRef, clearAll, send };
+    return { model, setModel, 
+            temperature, setTemperature,
+            input, setInput,
+            history, setHistory,
+            boxRef, clearAll, send
+        };
 }
